@@ -4,9 +4,17 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:wpf_Motion_emul"
+        xmlns:my="clr-namespace:wpf_Motion_emul.Controls"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
+        Title="MainWindow" Height="849.499" Width="929.111" KeyDown="Window_KeyDown" Closing="Window_Closing">
     <Grid>
-        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="4*"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Canvas x:Name="cnv" Margin="10,10,0,0" Background="White" KeyDown="cnv_KeyDown">
+            <my:RobotControl x:Name="robot" Height="100" Width="100" Grid.Row="0"/>
+        </Canvas>
+        <my:Laser_Viewer x:Name="laser" Grid.Row="1"></my:Laser_Viewer>
     </Grid>
 </Window>
