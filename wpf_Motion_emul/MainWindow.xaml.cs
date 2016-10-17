@@ -23,12 +23,32 @@ namespace wpf_Motion_emul {
             InitializeComponent();
             Map = new double[2, 1000];
             Map2 = new List<double[]>();
+            pol = new Polyline() {
+                Fill = new SolidColorBrush(Colors.Pink),
+                StrokeThickness = 5,
+                Stroke = new SolidColorBrush(Colors.Pink)
+            };
+
+            rec = new Rectangle() {
+                Height = 50,
+                Width = 50,
+                Fill = new SolidColorBrush(Colors.Black)
+            };
+
+            text = new TextBlock() {
+                Text = $"X = x; Y = y;",
+                Height = 20,
+            };
             robot.Init(50, 100, 3);
             Start();
         }
 
         public double[,] Map;
         public List<double[]> Map2;
+        Polyline pol;
+        Rectangle rec;
+        TextBlock text;
+
         public void Start() {
             Thread thrd_work = new Thread(new ThreadStart(Work));
             robot.Init(50, 100, 1);
@@ -45,7 +65,11 @@ namespace wpf_Motion_emul {
                     //robot.Offset = laser.Offset;
                     cnv.Children.Add(robot);
                     cnv.Children.Add(line);
+                    cnv.Children.Add(line2);
+                    cnv.Children.Add(rec);
+                    cnv.Children.Add(text);
                     CombinedGeometry g = RenderedIntersect(cnv, robot.laser, line);
+                    CombinedGeometry g2 = RenderedIntersect(cnv, robot.laser, line2);
                     if (!g.Bounds.IsEmpty) {
                         double offs = g.Bounds.Y - robot.GetY() - 50;
                         double[] temp = new double[2] { robot.X + robot.Distance, robot.Y + offs };
@@ -62,27 +86,56 @@ namespace wpf_Motion_emul {
                         for (int i = 0; i < Map2.Count; i++) {
                             if (robot.X  < Map2[i][0]) {
                                 robot.Offset = Map2[i][1] - robot.Y;
-                                Console.WriteLine($"NEW!!! {i}  Map1 = {Map2[i][0]}; Map2 = {Map2[i][1]}; Offs = {Map2[i][1] - robot.Y}; robotX = {robot.X}");
+                                //Console.WriteLine($"NEW!!! {i}  Map1 = {Map2[i][0]}; Map2 = {Map2[i][1]}; Offs = {Map2[i][1] - robot.Y}; robotX = {robot.X}");
                                 break;
                             }
                         }
                         
-                        Polyline pol = new Polyline() {
-                            Fill = new SolidColorBrush(Colors.Pink),
-                            StrokeThickness = 5,
-                            Stroke = new SolidColorBrush(Colors.Pink)                           
-                            };
-                        cnv.Children.Remove(pol);
+                        pol.Points.Clear();                 
+                        foreach (var item in Map2) {
+                            pol.Points.Add(new Point(item[0] + robot.Distance, item[1] + 40));
+                        }
+                        
+                        laser.SetOffset(offs);
+                    }
+                    else if (!g2.Bounds.IsEmpty) {
+                        double offs = g2.Bounds.Y - robot.GetY() - 50;
+                        double[] temp = new double[2] { robot.X + robot.Distance, robot.Y + offs };
+                        if (c != 0) {
+                            if (Map2[c - 1][0] != temp[0]) {
+                                Map2.Add(temp);
+                                c++;
+                            }
+                        }
+                        else {
+                            Map2.Add(temp);
+                            c++;
+                        }
+                        for (int i = 0; i < Map2.Count; i++) {
+                            if (robot.X < Map2[i][0]) {
+                                robot.Offset = Map2[i][1] - robot.Y;
+                                //Console.WriteLine($"NEW!!! {i}  Map1 = {Map2[i][0]}; Map2 = {Map2[i][1]}; Offs = {Map2[i][1] - robot.Y}; robotX = {robot.X}");
+                                break;
+                            }
+                        }
+                        pol.Points.Clear();
                         foreach (var item in Map2) {
                             pol.Points.Add(new Point(item[0], item[1]));
                         }
-                        cnv.Children.Add(pol);
+
                         laser.SetOffset(offs);
                     }
                     else {
+                        for (int i = 0; i < Map2.Count; i++) {
+                            if (robot.X < Map2[i][0]) {
+                                robot.Offset = Map2[i][1] - robot.Y;
+                                //Console.WriteLine($"NEW!!! {i}  Map1 = {Map2[i][0]}; Map2 = {Map2[i][1]}; Offs = {Map2[i][1] - robot.Y}; robotX = {robot.X}");
+                                break;
+                            }
+                        }
                         laser.SetOffset(0);
                     }
-
+                    cnv.Children.Add(pol);
                 });
                 Thread.Sleep(30);
             }
@@ -135,6 +188,7 @@ namespace wpf_Motion_emul {
             else if(e.Key == Key.Enter) {
                 robot.X = 50;
                 robot.Y = 100;
+                //Map2.Clear();
             }
             
 
@@ -181,6 +235,22 @@ namespace wpf_Motion_emul {
                 RotateTransform r = new RotateTransform();
                 r.Angle = e.GetPosition(cnv).Y / 5;
                 line.RenderTransform = r;
+            }
+            else {
+                rec = new Rectangle() {
+                    Height = e.GetPosition(cnv).Y,
+                    Width = e.GetPosition(cnv).X,
+                    //Fill = new SolidColorBrush(Colors.Black),
+                    StrokeThickness = 0.5,
+                    Stroke = new SolidColorBrush(Colors.Black)
+                };
+                Canvas.SetTop(rec, 0);
+                Canvas.SetLeft(rec, 0);
+
+                text.Text = $"X = {e.GetPosition(cnv).X}; Y = {e.GetPosition(cnv).Y};";
+                Canvas.SetTop(text, e.GetPosition(cnv).Y);
+                Canvas.SetLeft(text, e.GetPosition(cnv).X + 20);
+                cnv.Children.Add(rec);
             }
         }
     }
