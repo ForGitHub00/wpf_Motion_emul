@@ -35,6 +35,19 @@ namespace wpf_Motion_emul {
                 Fill = new SolidColorBrush(Colors.Black)
             };
 
+            poi = new PointCollection();
+            //poi.Add(new Point(50, 50));
+            //poi.Add(new Point(10, 150));
+            //poi.Add(new Point(200, 300));
+            myPolygon = new Polygon();
+            myPolygon.Points = poi;
+           // myPolygon.Fill = Brushes.Blue;
+           // myPolygon.Width = 50;
+           // myPolygon.Height = 50;
+            myPolygon.Stretch = Stretch.UniformToFill;
+            myPolygon.Stroke = Brushes.Black;
+            myPolygon.StrokeThickness = 2;
+
             text = new TextBlock() {
                 Text = $"X = x; Y = y;",
                 Height = 20,
@@ -48,6 +61,9 @@ namespace wpf_Motion_emul {
         Polyline pol;
         Rectangle rec;
         TextBlock text;
+        PointCollection poi;
+        Polygon myPolygon;
+
 
         public void Start() {
             Thread thrd_work = new Thread(new ThreadStart(Work));
@@ -68,10 +84,30 @@ namespace wpf_Motion_emul {
                     cnv.Children.Add(line2);
                     cnv.Children.Add(rec);
                     cnv.Children.Add(text);
+
+
+                    //myPolygon.Points.Clear();
+                   
+                    //poi.Add(new Point(robot.X, robot.Y));
+                    //myPolygon.Points = poi;
+                    //Canvas.SetTop(myPolygon, robot.Y);
+                    //Canvas.SetLeft(myPolygon, 75);
+                    //cnv.Children.Add(myPolygon);
+                    // cnv.Children.Add(p2);
+                   
+
                     CombinedGeometry g = RenderedIntersect(cnv, robot.laser, line);
                     CombinedGeometry g2 = RenderedIntersect(cnv, robot.laser, line2);
-                    if (!g.Bounds.IsEmpty) {
-                        double offs = g.Bounds.Y - robot.GetY() - 50;
+                    if (!g.Bounds.IsEmpty || !g2.Bounds.IsEmpty) {
+                        double offs = 0;
+                        if (!g.Bounds.IsEmpty) {
+                             offs = g.Bounds.Y - robot.GetY() - 50;
+                        }
+                        else {
+                             offs = g2.Bounds.Y - robot.GetY() - 50;
+                        }
+
+                        
                         double[] temp = new double[2] { robot.X + robot.Distance, robot.Y + offs };
                         if (c != 0) {
                         if (Map2[c - 1][0] != temp[0]) {
@@ -86,45 +122,18 @@ namespace wpf_Motion_emul {
                         for (int i = 0; i < Map2.Count; i++) {
                             if (robot.X  < Map2[i][0]) {
                                 robot.Offset = Map2[i][1] - robot.Y;
-                                //Console.WriteLine($"NEW!!! {i}  Map1 = {Map2[i][0]}; Map2 = {Map2[i][1]}; Offs = {Map2[i][1] - robot.Y}; robotX = {robot.X}");
+                                //Console.WriteLine($"Offset = {Map2[i][1] - robot.Y}");
                                 break;
                             }
                         }
                         
                         pol.Points.Clear();                 
                         foreach (var item in Map2) {
-                            pol.Points.Add(new Point(item[0] + robot.Distance, item[1] + 40));
+                            pol.Points.Add(new Point(item[0] + robot.Distance, item[1] + 50));
                         }
                         
                         laser.SetOffset(offs);
-                    }
-                    else if (!g2.Bounds.IsEmpty) {
-                        double offs = g2.Bounds.Y - robot.GetY() - 50;
-                        double[] temp = new double[2] { robot.X + robot.Distance, robot.Y + offs };
-                        if (c != 0) {
-                            if (Map2[c - 1][0] != temp[0]) {
-                                Map2.Add(temp);
-                                c++;
-                            }
-                        }
-                        else {
-                            Map2.Add(temp);
-                            c++;
-                        }
-                        for (int i = 0; i < Map2.Count; i++) {
-                            if (robot.X < Map2[i][0]) {
-                                robot.Offset = Map2[i][1] - robot.Y;
-                                //Console.WriteLine($"NEW!!! {i}  Map1 = {Map2[i][0]}; Map2 = {Map2[i][1]}; Offs = {Map2[i][1] - robot.Y}; robotX = {robot.X}");
-                                break;
-                            }
-                        }
-                        pol.Points.Clear();
-                        foreach (var item in Map2) {
-                            pol.Points.Add(new Point(item[0], item[1]));
-                        }
-
-                        laser.SetOffset(offs);
-                    }
+                    }                
                     else {
                         for (int i = 0; i < Map2.Count; i++) {
                             if (robot.X < Map2[i][0]) {
@@ -135,8 +144,10 @@ namespace wpf_Motion_emul {
                         }
                         laser.SetOffset(0);
                     }
-                    cnv.Children.Add(pol);
+                    
+                   // cnv.Children.Add(pol);
                 });
+                GC.Collect();
                 Thread.Sleep(30);
             }
         }

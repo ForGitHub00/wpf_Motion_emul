@@ -53,6 +53,7 @@ namespace wpf_Motion_emul.Controls {
                         Offset = 0;
                     }
                     else {
+                        Console.WriteLine($"OffsetRobot = {Offset}");
                         if (Offset < 0) {
                             Y = Y - 1 * Speed;
                             Offset += 1;
