@@ -31,6 +31,14 @@ namespace wpf_Motion_emul.Controls {
             lb_offset.Content = Offset.ToString();
         }
 
+        public void SetOffset(double value) {
+            lb_offset.Content = value.ToString();
+            Offset = value;
+            value *= 4;
+            value += 200;
+            slider.Value = value + 40;
+
+        }
         public double GetOffset() {
             return Offset;
         }

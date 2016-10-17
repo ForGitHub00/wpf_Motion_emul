@@ -12,7 +12,17 @@
             <RowDefinition Height="4*"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <Canvas x:Name="cnv" Margin="10,10,0,0" Background="White" KeyDown="cnv_KeyDown">
+        <Canvas x:Name="cnv" Margin="10,10,0,0" Background="White" KeyDown="cnv_KeyDown" MouseMove="cnv_MouseMove">
+            <Line x:Name="line" Height="5" Width="400" Fill="Green" StrokeThickness="5" Canvas.Left="311" Canvas.Top="268" Stroke="#FF00FF0C" X2="400" RenderTransformOrigin="0.5,0.5" MouseDown="line_MouseDown" MouseUp="line_MouseUp" >
+                <Line.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform/>
+                        <SkewTransform/>
+                        <RotateTransform Angle="-12.167"/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </Line.RenderTransform>
+            </Line>
             <my:RobotControl x:Name="robot" Height="100" Width="100" Grid.Row="0"/>
         </Canvas>
         <my:Laser_Viewer x:Name="laser" Grid.Row="1"></my:Laser_Viewer>

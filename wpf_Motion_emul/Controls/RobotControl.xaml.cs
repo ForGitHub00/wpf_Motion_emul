@@ -21,12 +21,13 @@ namespace wpf_Motion_emul.Controls {
     public partial class RobotControl : UserControl {
         public RobotControl() {
             InitializeComponent();
-            
+            Distance = 50;
         }
         public double X;
         public double Y;
         public double Speed;
         public double Offset;
+        public double Distance;
         public Thread thrd_move;
 
         public double GetY() {
@@ -48,9 +49,18 @@ namespace wpf_Motion_emul.Controls {
             while (true) {
                 Dispatcher.Invoke(() => {
                     X += 1 * Speed;
-                    if (Offset != 0 && Offset % 1 < 1) {
-                        Y = Y + Offset / (-Offset);
-                        Offset = Offset - (Offset / (-Offset));
+                    if (Math.Abs(Offset) < 1) {
+                        Offset = 0;
+                    }
+                    else {
+                        if (Offset < 0) {
+                            Y = Y - 1 * Speed;
+                            Offset += 1;
+                        }
+                        else {
+                            Y = Y + 1 * Speed;
+                            Offset -= 1;
+                        }                      
                     }
                 });
                 Thread.Sleep(30);
